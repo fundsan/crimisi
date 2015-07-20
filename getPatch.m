@@ -1,0 +1,27 @@
+function [patch, patchMask] = getPatch(image,px,py,patchK,mask)
+    pRow   = patchK;
+    pColumn = patchK;
+    [iRow iColumn iChannel] = size(image);
+     ipr = (pRow-1)/2;
+     ipc = (pColumn-1)/2;
+     paddedImage = zeros(iRow+pRow-1,iColumn+pColumn-1, iChannel);
+     paddedImage(ipr+1:ipr+iRow, ipc+1:iColumn+ipc,:) = image;
+     paddedImage(1:ipr,ipc+1:iColumn+ipc,:) =image(abs(-(ipr):-1),:,:);
+     paddedImage(ipr+iRow+1:iRow+pRow-1 ,ipc+1:iColumn+ipc, :) = image(abs(-(iRow):-(iRow-ipr+1)),:,:);     
+     paddedImage(ipr+1:iRow+ipr,1:ipc,:) =image(:,abs(-(ipc):-1),:);
+     paddedImage(ipr+1:iRow+ipr,ipc+iColumn+1:iColumn+pColumn-1,:) =image(:,abs(-(iColumn):-(iColumn-ipc+1)),:); 
+     
+     paddedMask = zeros(iRow+pRow-1,iColumn+pColumn-1);
+     paddedMask(ipr+1:ipr+iRow, ipc+1:iColumn+ipc) = mask;
+     paddedMask(1:ipr,ipc+1:iColumn+ipc) =0;
+     paddedMask(ipr+iRow+1:iRow+pRow-1 ,ipc+1:iColumn+ipc) = 0;     
+     paddedMask(ipr+1:iRow+ipr,1:ipc) =0;
+     paddedMask(ipr+1:iRow+ipr,ipc+iColumn+1:iColumn+pColumn-1) =0;
+     px = px + ipc;
+     py = py + ipr;
+        left = px - ipc;
+        right = px +ipc;
+        up = py - ipr;
+        down = py + ipr;
+    patch = paddedImage(up:down,left:right,:);
+    patchMask = paddedMask(up:down,left:right);
